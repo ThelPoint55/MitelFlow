@@ -37,6 +37,21 @@ const Storage = (() => {
   function persist(state) {
     state.updatedAt = new Date().toISOString();
     localStorage.setItem(KEY, JSON.stringify(state));
+    if (typeof FirebaseSync !== 'undefined') FirebaseSync.push(state);
+  }
+
+  function loadFromFirebase(data) {
+    if (!data) return;
+    const state = {
+      version:   data.version   || 1,
+      updatedAt: data.updatedAt || new Date().toISOString(),
+      settings:  data.settings  || {},
+      members:   data.members   || [],
+      tags:      data.tags      || [],
+      columns:   data.columns   || [],
+      cards:     data.cards     || [],
+    };
+    localStorage.setItem(KEY, JSON.stringify(state));
   }
 
   function load() {
@@ -283,5 +298,6 @@ const Storage = (() => {
     getCurrentUser,
     setCurrentUser,
     clearCurrentUser,
+    loadFromFirebase,
   };
 })();

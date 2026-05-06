@@ -1336,6 +1336,6 @@ function autoSave() {
     setTimeout(() => el.remove(), 3200);
   }
 
-  return { init };
+  return { init, renderBoard };
 
 })();

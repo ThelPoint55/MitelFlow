@@ -232,15 +232,28 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" integrity="sha512-RwjzjB1A32eEZfkttk2snY2EHlxtLxYgf7hJMOCpS1mPi3SrY01XGNlWjZ6r73Gh0GMw/bU8fvbFbXYJDsuSzw==" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth-config.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-sync.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/kanban.js"></script>
   <script>
     Auth.init(function() {
       document.getElementById('btn-ms-login').onclick = () => Auth.login();
-      Kanban.init();
+      FirebaseSync.init(
+        function(fbData) {
+          if (fbData) Storage.loadFromFirebase(fbData);
+          Kanban.init();
+        },
+        function(fbData) {
+          Storage.loadFromFirebase(fbData);
+          Kanban.renderBoard();
+        }
+      );
     });
     document.getElementById('btn-ms-login').onclick = () => Auth.login();
   </script>
