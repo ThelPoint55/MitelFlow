@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MitelFlow</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="kanban-page">
+
+  <!-- ── OVERLAY DE LOGIN ── -->
+  <div id="auth-overlay" class="auth-overlay" style="display:none">
+    <div class="auth-card">
+      <img src="Mitel-Logo-RGB.png" class="auth-logo" alt="Mitel">
+      <h2>MitelFlow</h2>
+      <p>Faça login com sua conta corporativa para continuar.</p>
+      <button class="btn btn-primary" id="btn-ms-login">Entrar com Microsoft</button>
+    </div>
+  </div>
+
+<div id="app-shell-content" class="app-shell" style="display:none">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="Mitel-Logo-RGB.png" class="sidebar-logo" alt="Mitel">
+    </div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon">🗂️</span>
+        <span class="nav-label">Kanban</span>
+      </a>
+      <a href="hld-compare.html" class="nav-item">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Leitor HLD</span>
+      </a>
+    </nav>
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="sidebar-user-avatar" id="sidebar-user-avatar"></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-user-name"></div>
+        <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      </div>
+      <button class="sidebar-logout-btn" id="btn-logout" title="Sair">↩</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-info">
+        <div class="topbar-title">MitelFlow</div>
+        <div class="topbar-subtitle">Esteira de Projetos — URA / Banco Pan</div>
+      </div>
+      <div class="topbar-search">
+        <span class="topbar-search-icon">&#128269;</span>
+        <input type="text" id="input-global-search" class="topbar-search-input" placeholder="Buscar cards..." autocomplete="off">
+        <button class="topbar-search-clear" id="btn-search-clear" style="display:none" title="Limpar busca">&times;</button>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm deadline-alert-btn" id="btn-deadline-alert" style="display:none" title="Ver cards com deadline próximo ou vencido"></button>
+        <button class="btn btn-ghost btn-sm" id="btn-manage-members">⊟ Filtro</button>
+        <button class="btn btn-primary btn-sm" id="btn-add-column">+ Nova Coluna</button>
+      </div>
+    </header>
+
+    <!-- KANBAN BOARD -->
+    <main id="kanban-board" class="kanban-board page-content kanban-content"></main>
+  </div>
+
+</div>
+
+  <!-- ── MODAL: Card (criar / editar) ──────────────────────────────────── -->
+  <div class="modal-backdrop" id="modal-card" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal modal-card-redesign">
+
+      <!-- Cabeçalho escuro -->
+      <div class="modal-header modal-header-dark">
+        <h2 id="modal-card-heading">Novo Card</h2>
+        <button class="modal-close modal-close-dark" id="btn-card-close" aria-label="Fechar">&times;</button>
+      </div>
+
+      <!-- Corpo em duas colunas -->
+      <div class="modal-card-body">
+
+        <!-- COLUNA ESQUERDA: título, descrição, checklist -->
+        <div class="modal-card-left">
+
+          <div class="form-group">
+            <label for="card-input-title">Título <span class="required">*</span></label>
+            <input type="text" id="card-input-title" placeholder="Nome do projeto ou tarefa" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <div class="checklist-header">
+              <label>Descrição do Projeto</label>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" id="btn-desc-edit-toggle">&#9998; Editar</button>
+                <button class="btn btn-ghost btn-sm" id="btn-open-hld" title="Gerar descrição a partir do HLD">&#128196; Ler HLD</button>
+              </div>
+            </div>
+            <div id="card-description-preview" class="desc-preview"></div>
+            <textarea id="card-description" rows="5" placeholder="Descrição gerada pelo Leitor HLD ou escreva manualmente..." style="display:none;width:100%;resize:vertical;font-size:.85rem;padding:8px;border:1px solid var(--color-border);border-radius:6px;font-family:inherit;box-sizing:border-box"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="checklist-header">
+              <label>Lista de Verificação</label>
+              <span id="checklist-progress-label" class="checklist-progress-label"></span>
+            </div>
+            <div id="card-checklist" class="checklist-list"></div>
+            <div class="checklist-add-row">
+              <input type="text" id="checklist-new-item" placeholder="Adicionar um item..." autocomplete="off">
+              <button class="btn btn-ghost btn-sm" id="btn-checklist-add">Adicionar</button>
+            </div>
+          </div>
+
+          <!-- Comentários -->
+          <div class="form-group" style="margin-bottom:0">
+            <div class="checklist-header">
+              <label>Comentários</label>
+              <span id="comments-count-label" class="checklist-progress-label"></span>
+            </div>
+            <div id="card-comments-list" class="comments-list"></div>
+            <div class="comment-input-row">
+              <div class="avatar-comment comment-me-avatar" id="comment-me-avatar"></div>
+              <input type="text" id="comment-input" placeholder="Adicionar comentário..." autocomplete="off">
+              <button class="btn btn-primary btn-sm" id="btn-comment-send">Enviar</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA: metadados -->
+        <div class="modal-card-right">
+
+          <div class="meta-section">
+            <span class="meta-label">Prioridade</span>
+            <div class="priority-selector" id="card-priority-selector">
+              <button type="button" class="priority-btn" data-priority="urgent">
+                <span class="priority-dot dot-urgent"></span> Urgente
+              </button>
+              <button type="button" class="priority-btn" data-priority="normal">
+                <span class="priority-dot dot-normal"></span> Normal
+              </button>
+              <button type="button" class="priority-btn" data-priority="low">
+                <span class="priority-dot dot-low"></span> Baixa
+              </button>
+            </div>
+          </div>
+
+          <div class="meta-section">
+            <label class="meta-label" for="card-input-deadline">Deadline</label>
+            <input type="date" id="card-input-deadline">
+          </div>
+
+          <div class="meta-section">
+            <label class="meta-label" for="card-select-column">Coluna</label>
+            <select id="card-select-column"></select>
+          </div>
+
+          <div class="meta-section">
+            <span class="meta-label">Tags</span>
+            <div class="tags-selector" id="card-tags-selector"></div>
+            <div class="tag-create-row" id="tag-create-row">
+              <input type="color" id="tag-color-input" value="#7B68EE" title="Cor da tag">
+              <input type="text" id="tag-name-input" placeholder="Nova tag..." autocomplete="off">
+              <button class="btn btn-ghost btn-sm" id="btn-tag-create">+ Criar</button>
+            </div>
+          </div>
+
+          <div class="meta-section">
+            <span class="meta-label">Responsáveis</span>
+            <div class="members-selector" id="card-members-selector">
+              <span class="members-empty">Nenhum membro cadastrado.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Rodapé -->
+      <div class="modal-footer modal-footer-card">
+        <button class="btn btn-danger btn-sm" id="btn-card-delete" style="display:none">Excluir Card</button>
+        <span id="card-autosave-status" class="autosave-status"></span>
+        <div style="display:flex;gap:var(--space-2);margin-left:auto">
+          <button class="btn btn-secondary btn-sm" id="btn-generate-rfc" style="display:none">📋 RFC</button>
+          <button class="btn btn-ghost" id="btn-card-cancel">Cancelar</button>
+          <button class="btn btn-primary" id="btn-card-save">Fechar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODAL: Squad / Filtro por membro ────────────────────────────── -->
+  <div class="modal-backdrop" id="modal-members" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal modal-squad">
+      <div class="modal-header modal-header-dark">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <h2>Filtro</h2>
+          <span class="squad-hint">Selecione membros e/ou tags para filtrar o board.</span>
+        </div>
+        <button class="modal-close modal-close-dark" id="btn-members-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div id="squad-filter-list" class="squad-filter-list"></div>
+      <div class="modal-footer filter-modal-footer" id="filter-modal-footer" style="display:none">
+        <button class="btn btn-ghost btn-sm" id="btn-clear-filter">✕ Limpar filtro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: Confirmação genérica ──────────────────────────────────── -->
+  <div class="modal-backdrop" id="modal-confirm" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal modal-sm">
+      <div class="modal-header modal-header-dark">
+        <h2 id="modal-confirm-heading">Confirmar</h2>
+        <button class="modal-close modal-close-dark" id="btn-confirm-close" aria-label="Fechar">&times;</button>
+      </div>
+      <p id="modal-confirm-text" class="modal-confirm-text"></p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-confirm-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="btn-confirm-ok">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" integrity="sha512-RwjzjB1A32eEZfkttk2snY2EHlxtLxYgf7hJMOCpS1mPi3SrY01XGNlWjZ6r73Gh0GMw/bU8fvbFbXYJDsuSzw==" crossorigin="anonymous"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/kanban.js"></script>
+  <script>
+    Auth.init(function() {
+      document.getElementById('btn-ms-login').onclick = () => Auth.login();
+      Kanban.init();
+    });
+    document.getElementById('btn-ms-login').onclick = () => Auth.login();
+  </script>
+</body>
+</html>

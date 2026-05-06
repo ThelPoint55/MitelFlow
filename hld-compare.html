@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leitor de HLD — MitelFlow</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="Mitel-Logo-RGB.png" class="sidebar-logo" alt="Mitel">
+    </div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🗂️</span>
+        <span class="nav-label">Kanban</span>
+      </a>
+      <a href="hld-compare.html" class="nav-item active">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Leitor HLD</span>
+      </a>
+    </nav>
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="sidebar-user-avatar" id="sidebar-user-avatar"></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-user-name"></div>
+        <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      </div>
+      <button class="sidebar-logout-btn" id="btn-logout" title="Sair">↩</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-info">
+        <div class="topbar-title">Leitor de HLD</div>
+        <div class="topbar-subtitle">Análise do projeto implantado — foco em QA e homologação</div>
+      </div>
+    </header>
+
+    <main class="page-content">
+    <div class="rfc-page-wrapper">
+
+      <!-- API Key -->
+      <div class="api-key-section">
+        <div style="font-weight:600; font-size: var(--font-size-sm)">🔑 Chave da API Groq (gratuita)</div>
+        <div class="api-key-row">
+          <input type="password" id="api-key-input" placeholder="gsk_...">
+          <button class="btn btn-secondary btn-sm" id="btn-save-key">Salvar</button>
+          <button class="btn btn-ghost btn-sm" id="btn-clear-key">Limpar</button>
+        </div>
+        <div class="key-info">
+          A chave é salva apenas no seu navegador (localStorage). Nunca sai do seu computador.
+          Obtenha gratuitamente (sem cartão) em <strong>console.groq.com</strong> → "API Keys" → "Create API Key".
+        </div>
+      </div>
+
+      <!-- Configurações -->
+      <div class="card" style="margin-bottom: var(--space-5)">
+        <div class="card-header">
+          <div class="card-title">Configurações</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4)">
+          <div class="form-group" style="margin:0">
+            <label>Nome do Projeto</label>
+            <input type="text" id="config-project-name" placeholder="Ex: URA Cartões Banco Pan">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Data do Projeto</label>
+            <input type="text" id="config-version" placeholder="Ex: 20/03/2026">
+          </div>
+        </div>
+      </div>
+
+      <!-- Zona de importação PDF -->
+      <div style="margin-bottom: var(--space-4)">
+        <div class="hld-section-label">HLD — Importar Documento</div>
+
+        <!-- Drop zone (visível quando nenhum arquivo selecionado) -->
+        <div class="pdf-dropzone" id="pdf-dropzone">
+          <input type="file" id="file-input" accept=".pdf">
+          <div class="drop-icon">📄</div>
+          <div class="drop-title">Arraste o PDF aqui ou clique para selecionar</div>
+          <div class="drop-sub">Apenas arquivos .pdf</div>
+        </div>
+
+        <!-- Estado carregado (visível após importar) -->
+        <div class="pdf-loaded" id="pdf-loaded">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-info">
+            <div class="pdf-name" id="pdf-name">—</div>
+            <div class="pdf-meta" id="pdf-meta">—</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-change-file">Trocar arquivo</button>
+        </div>
+      </div>
+
+      <!-- Instruções para o Groq -->
+      <div class="form-group" style="margin-bottom: var(--space-4)">
+        <label for="user-instructions" class="hld-section-label">Instruções para a análise</label>
+        <textarea
+          id="user-instructions"
+          class="rfc-textarea"
+          rows="4"
+          placeholder="Opcional — deixe vazio para análise automática do projeto mais recente do versionamento.
+
+Use apenas quando quiser focar em algo específico:
+• Propensão BACEN
+• Página 5 até página 12
+• Apenas as integrações SOA modificadas
+• Fluxos de autenticação biométrica"
+        ></textarea>
+      </div>
+
+      <!-- Opções de análise -->
+      <div class="hld-options-bar">
+        <label>
+          <input type="checkbox" id="full-mode-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--color-primary)">
+          <span><strong>Modo Completo</strong> — enviar todo o documento ao modelo (melhor para PDFs pequenos / sem filtros)</span>
+        </label>
+      </div>
+
+      <!-- Botões de ação -->
+      <div class="action-bar" style="border-top:none;padding-top:0;margin-top:0;margin-bottom:var(--space-4)">
+        <button class="btn btn-primary" id="btn-generate" disabled>
+          ✦ Gerar Documentação
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-clear-all">Limpar tudo</button>
+      </div>
+
+      <!-- Status -->
+      <div id="progress-status" class="progress-status" style="display:none">
+        <div class="spinner"></div>
+        <div id="progress-text">Gerando documentação Product Owner...</div>
+      </div>
+
+      <!-- Resultado -->
+      <div id="result-area" style="display:none">
+        <div style="display:flex;justify-content:flex-end;gap:var(--space-2);margin-bottom:var(--space-3)">
+          <button class="btn btn-secondary btn-sm" id="btn-export-doc">&#128196; Exportar PDF</button>
+          <button class="btn btn-ghost btn-sm" id="btn-edit-toggle">&#9998; Editar</button>
+          <button class="btn btn-ghost btn-sm" id="btn-copy-text">Copiar texto</button>
+        </div>
+        <div id="pages-badge" class="pages-badge" style="display:none">
+          <span class="pb-label">&#128196; Páginas analisadas</span>
+          <span class="pb-pages" id="pages-badge-text"></span>
+        </div>
+        <div id="result-output"></div>
+        <textarea id="result-edit" spellcheck="false"></textarea>
+      </div>
+
+    </div>
+    </main>
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" integrity="sha512-RwjzjB1A32eEZfkttk2snY2EHlxtLxYgf7hJMOCpS1mPi3SrY01XGNlWjZ6r73Gh0GMw/bU8fvbFbXYJDsuSzw==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ==" crossorigin="anonymous"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/hld-compare.js"></script>
+  <script>
+    const _hldUser = Auth.requireAuth();
+    if (_hldUser) document.getElementById('btn-logout').onclick = () => Auth.logout();
+  </script>
+</body>
+</html>

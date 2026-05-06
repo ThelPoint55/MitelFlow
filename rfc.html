@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de RFC — MitelFlow</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="Mitel-Logo-RGB.png" class="sidebar-logo" alt="Mitel">
+    </div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🗂️</span>
+        <span class="nav-label">Kanban</span>
+      </a>
+      <a href="hld-compare.html" class="nav-item">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Leitor HLD</span>
+      </a>
+    </nav>
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="sidebar-user-avatar" id="sidebar-user-avatar"></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-user-name"></div>
+        <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      </div>
+      <button class="sidebar-logout-btn" id="btn-logout" title="Sair">↩</button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-info">
+        <div class="topbar-title">Gerador de RFC</div>
+        <div class="topbar-subtitle">Auto-preenchimento a partir do card Kanban</div>
+      </div>
+    </header>
+
+    <main class="page-content">
+    <div class="rfc-page-wrapper">
+
+      <!-- Card de origem -->
+      <div class="rfc-origem" id="rfc-origem">
+        <div class="origem-icon">📋</div>
+        <div>
+          <div class="origem-title" id="origem-title">Carregando...</div>
+          <div class="origem-meta"  id="origem-meta">—</div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 1 — Identificação -->
+      <div class="section-card">
+        <div class="section-title">1. Identificação</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+
+          <div class="form-group" style="margin:0;grid-column:1/-1">
+            <label for="rfc-projeto">Projeto <span class="required">*</span></label>
+            <input type="text" id="rfc-projeto" placeholder="Nome do projeto" autocomplete="off">
+          </div>
+
+          <div class="form-group" style="margin:0">
+            <label for="rfc-ura">URA / Categoria</label>
+            <select id="rfc-ura">
+              <option value="">— Selecione —</option>
+              <option value="Cartões">Cartões</option>
+              <option value="Finan">Finan</option>
+              <option value="SAC">SAC</option>
+              <option value="Ouvidoria">Ouvidoria</option>
+              <option value="Cartões e Finan">Cartões e Finan</option>
+              <option value="Cartões e SAC">Cartões e SAC</option>
+              <option value="Finan e SAC">Finan e SAC</option>
+              <option value="Cartões, Finan e SAC">Cartões, Finan e SAC</option>
+              <option value="CXOne">CXOne</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin:0">
+            <label for="rfc-data">Data de Execução</label>
+            <input type="date" id="rfc-data">
+          </div>
+
+          <div class="form-group" style="margin:0">
+            <label for="rfc-numero">Número da RFC</label>
+            <input type="text" id="rfc-numero" placeholder="Ex: 20260515" autocomplete="off" maxlength="20">
+          </div>
+
+          <div class="form-group" style="margin:0;grid-column:1/-1">
+            <label for="rfc-solicitante">Solicitante (Pan)</label>
+            <input type="text" id="rfc-solicitante" placeholder="Nome do solicitante" list="solicitante-list" autocomplete="off">
+            <datalist id="solicitante-list">
+              <option value="Paulo Henrique Nunes de Brito">
+              <option value="Priscila Lira Nicoli">
+              <option value="Luis Paulo Da Paixao Mariano">
+              <option value="Pedro Veber">
+              <option value="Cicero Batista De Morais Neto">
+            </datalist>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SEÇÃO 2 — Descrição -->
+      <div class="section-card">
+        <div class="section-title">2. Descrição</div>
+
+        <div class="form-group">
+          <label for="rfc-local">Local da Atividade</label>
+          <textarea id="rfc-local" class="rfc-textarea" rows="2" placeholder="Ex: CXOne, Plataforma Avaya, Ambiente de homologação..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="rfc-atividade">Atividade a ser Executada</label>
+          <textarea id="rfc-atividade" class="rfc-textarea" rows="5">Atualização de Script no ambiente de Produção.</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="rfc-motivo">Motivo</label>
+          <textarea id="rfc-motivo" class="rfc-textarea" rows="3" placeholder="Justificativa da mudança..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0">
+          <label for="rfc-riscos">Riscos</label>
+          <textarea id="rfc-riscos" class="rfc-textarea" rows="2">Não são esperados riscos com a implantação deste projeto.</textarea>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 3 — Scripts Afetados -->
+      <div class="section-card">
+        <div class="section-title">3. Scripts Afetados</div>
+
+        <div style="overflow-x:auto">
+          <table class="scripts-table" id="scripts-table">
+            <thead>
+              <tr>
+                <th>Nome do Script</th>
+                <th>Ambiente (BU)</th>
+                <th>Data / Hora do Script</th>
+                <th>Possui novo áudio</th>
+                <th class="td-del"></th>
+              </tr>
+            </thead>
+            <tbody id="scripts-tbody">
+              <!-- linhas geradas pelo JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-add-script" style="margin-top:var(--space-3)">
+          + Adicionar Script
+        </button>
+      </div>
+
+      <!-- SEÇÃO 4 — Prompts -->
+      <div class="section-card">
+        <div class="section-title">4. Prompts</div>
+
+        <div style="overflow-x:auto">
+          <table class="scripts-table" id="prompts-table">
+            <thead>
+              <tr>
+                <th>Nome Prompt</th>
+                <th>Ambiente</th>
+                <th class="td-del"></th>
+              </tr>
+            </thead>
+            <tbody id="prompts-tbody">
+              <!-- linhas geradas pelo JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-add-prompt" style="margin-top:var(--space-3)">
+          + Adicionar Prompt
+        </button>
+      </div>
+
+      <!-- SEÇÃO 5 — Planos RFC -->
+      <div class="section-card">
+        <div class="section-title">5. Planos RFC</div>
+
+        <!-- Plano Técnico da Atividade -->
+        <div class="plan-block">
+          <div class="plan-block-title">Plano Técnico da Atividade</div>
+          <div style="overflow-x:auto">
+            <table class="scripts-table">
+              <thead>
+                <tr>
+                  <th>Início</th>
+                  <th>Duração</th>
+                  <th>Atividade</th>
+                  <th>Responsável</th>
+                  <th class="td-del"></th>
+                </tr>
+              </thead>
+              <tbody id="plan-tecnico-tbody"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-add-plan-tecnico" style="margin-top:var(--space-3)">+ Adicionar linha</button>
+        </div>
+
+        <!-- Plano de Testes -->
+        <div class="plan-block">
+          <div class="plan-block-title">Plano de Testes</div>
+          <div style="overflow-x:auto">
+            <table class="scripts-table">
+              <thead>
+                <tr>
+                  <th>Início</th>
+                  <th>Duração</th>
+                  <th>Atividade</th>
+                  <th>Responsável</th>
+                  <th class="td-del"></th>
+                </tr>
+              </thead>
+              <tbody id="plan-testes-tbody"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-add-plan-testes" style="margin-top:var(--space-3)">+ Adicionar linha</button>
+        </div>
+
+        <!-- Plano de Roll Back -->
+        <div class="plan-block">
+          <div class="plan-block-title">Plano de Roll Back</div>
+          <div style="overflow-x:auto">
+            <table class="scripts-table">
+              <thead>
+                <tr>
+                  <th>Início</th>
+                  <th>Duração</th>
+                  <th>Atividade</th>
+                  <th>Responsável</th>
+                  <th class="td-del"></th>
+                </tr>
+              </thead>
+              <tbody id="plan-rollback-tbody"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-add-plan-rollback" style="margin-top:var(--space-3)">+ Adicionar linha</button>
+        </div>
+
+      </div>
+
+      <!-- Template -->
+      <div class="section-card">
+        <div class="section-title">Template RFC (.xlsx)</div>
+
+        <div class="tpl-dropzone" id="tpl-dropzone">
+          <input type="file" id="tpl-file-input" accept=".xlsx"
+            style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1">
+          <div style="font-size:2rem;margin-bottom:8px">📂</div>
+          <div style="font-weight:700;font-size:var(--font-size-sm);color:var(--color-text);margin-bottom:4px">
+            Arraste o arquivo RFC aqui ou clique para selecionar
+          </div>
+          <div style="font-size:var(--font-size-xs);color:var(--color-text-muted)">
+            Exemplo: _RFC Mitel - Desenvolvimento Integração Pismo (Pacote 2).xlsx
+          </div>
+        </div>
+
+        <div class="tpl-loaded" id="tpl-loaded">
+          <span style="font-size:1.5rem;flex-shrink:0">📄</span>
+          <span class="tpl-name" id="tpl-loaded-name">Template carregado</span>
+          <div style="display:flex;gap:var(--space-2);flex-shrink:0">
+            <button class="btn btn-secondary btn-sm" id="btn-embed-template" title="Gera um arquivo JS para embutir o template permanentemente no app">💾 Salvar como padrão</button>
+            <button class="btn btn-ghost btn-sm" id="btn-clear-template">Trocar</button>
+          </div>
+        </div>
+
+        <div id="embed-instructions" class="embed-instructions" style="display:none">
+          <strong>Template embutido gerado!</strong><br>
+          Mova o arquivo <code>rfc-template-data.js</code> baixado para a pasta <code>js/</code> deste projeto.<br>
+          A partir daí o template será carregado automaticamente em qualquer computador, sem precisar anexar nada.
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="action-bar">
+        <button class="btn btn-primary" id="btn-download" disabled>
+          📥 Baixar RFC Preenchido (.xlsx)
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-clear-form">Limpar formulário</button>
+      </div>
+
+    </div>
+    </main>
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
+
+  <datalist id="resp-list">
+    <option value="Pan">
+    <option value="Unify">
+  </datalist>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" integrity="sha512-RwjzjB1A32eEZfkttk2snY2EHlxtLxYgf7hJMOCpS1mPi3SrY01XGNlWjZ6r73Gh0GMw/bU8fvbFbXYJDsuSzw==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/rfc-template-data.js" onerror=""></script>
+  <script src="js/rfc.js"></script>
+  <script>
+    const _rfcUser = Auth.requireAuth();
+    if (_rfcUser) document.getElementById('btn-logout').onclick = () => Auth.logout();
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Dependências e cache
+node_modules/
+.npm/
+
+# Arquivos de teste (não vai para prod)
+test-runner.mjs
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Ambiente local
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
