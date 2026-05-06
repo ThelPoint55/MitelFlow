@@ -12,21 +12,26 @@ const FirebaseSync = (() => {
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
 
-    db.ref('board').on('value', snapshot => {
-      const data = snapshot.val();
+    // Login anônimo — garante que auth != null antes de acessar o banco
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        db.ref('board').on('value', snapshot => {
+          const data = snapshot.val();
 
-      if (!_ready) {
-        _ready = true;
-        onReady(data);
-        return;
-      }
+          if (!_ready) {
+            _ready = true;
+            onReady(data);
+            return;
+          }
 
-      // Ignora o echo das próprias escritas
-      if (_skipNext > 0) { _skipNext--; return; }
+          // Ignora o echo das próprias escritas
+          if (_skipNext > 0) { _skipNext--; return; }
 
-      // Atualização veio de outro usuário
-      if (_onRemote && data) _onRemote(data);
-    });
+          // Atualização veio de outro usuário
+          if (_onRemote && data) _onRemote(data);
+        });
+      })
+      .catch(err => console.error('[FirebaseSync] Falha no login anônimo:', err));
   }
 
   function push(state) {
